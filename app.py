@@ -1,4 +1,4 @@
-"""Meeting Action Items to Slack — review, approve, and send."""
+"""Meeting Action Items to Slack — transcript extraction, review and Slack posting."""
 
 import pandas as pd
 import streamlit as st
@@ -27,7 +27,6 @@ with st.form("transcript_form"):
     submitted = st.form_submit_button("Extract Action Items", type="primary")
 
 if submitted:
-    # A new extraction invalidates all previous approval and review state.
     st.session_state.items = []
     st.session_state.extracted_from = None
     st.session_state.pop("review_editor", None)
@@ -45,22 +44,30 @@ if submitted:
             st.error(str(exc))
 
 if st.session_state.extracted_from is not None:
-    st.subheader("Review action items")
+    st.subheader("Review and approve")
     if not st.session_state.items:
-        st.info("No clear action items found. You can add a task manually below.")
-    st.write("Edit cells, add rows or delete incorrect items. Changes are not sent until you approve.")
-    edited = st.data_editor(
-        pd.DataFrame(st.session_state.items, columns=["task", "owner", "due_date"]),
-        key="review_editor",
-        num_rows="dynamic",
-        hide_index=True,
-        use_container_width=True,
-        column_config={
-            "task": st.column_config.TextColumn("Task", required=True),
-            "owner": st.column_config.TextColumn("Owner"),
-            "due_date": st.column_config.TextColumn("Deadline"),
-        },
-    )
+        st.info("No clear action items found. You can add a task manually.")
+    st.write("Edit cells, add rows or delete incorrect items, then explicitly approve and post.")
+
+    with st.form("review_and_post"):
+        edited = st.data_editor(
+            pd.DataFrame(st.session_state.items, columns=["task", "owner", "due_date"]),
+            key="review_editor",
+            num_rows="dynamic",
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                "task": st.column_config.TextColumn("Task", required=True),
+                "owner": st.column_config.TextColumn("Owner"),
+                "due_date": st.column_config.TextColumn("Deadline"),
+            },
+        )
+        approved = st.checkbox(
+            "I have reviewed these action items and approve posting them to Slack.",
+            key="approve_post",
+        )
+        send = st.form_submit_button("Post approved recap to Slack", type="primary")
+
     reviewed = []
     for row in edited.to_dict("records"):
         task = str(row.get("task") or "").strip()
@@ -72,21 +79,20 @@ if st.session_state.extracted_from is not None:
                 "owner": owner if owner and owner.lower() != "nan" else "Unassigned",
                 "due_date": due_date if due_date and due_date.lower() != "nan" else "Not specified",
             })
-
     st.subheader("Slack recap preview")
     if reviewed:
         st.code(format_recap(reviewed), language=None)
     else:
         st.warning("Add at least one task before posting.")
 
-    approved = st.checkbox(
-        "I have reviewed the action items and approve posting this recap to Slack.",
-        key="approve_post",
-    )
-    if st.button("Post approved recap to Slack", disabled=not approved or not reviewed, type="primary"):
-        try:
-            post_to_slack(reviewed)
-            st.success("Recap posted to Slack successfully.")
-            st.session_state.approve_post = False
-        except SlackDeliveryError as exc:
-            st.error(str(exc))
+    if send:
+        if not approved:
+            st.error("Review and approve the recap before posting.")
+        elif not reviewed:
+            st.error("Add at least one action item before posting.")
+        else:
+            try:
+                post_to_slack(reviewed)
+                st.success("Recap posted to Slack successfully.")
+            except SlackDeliveryError as exc:
+                st.error(str(exc))
