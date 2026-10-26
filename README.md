@@ -1,29 +1,43 @@
 # Meeting Action Items to Slack
 
-A lightweight meeting transcript-to-Slack project, built incrementally for a vibe-coding assignment.
+A lightweight transcript-to-Slack tool, built in documented slices for a vibe-coding assignment.
 
-## Current state: Slice 1
-A Streamlit page accepts pasted meeting transcripts and validates empty/whitespace input and a 50,000-character limit. The **Extract Action Items** button currently validates only; it does **not** call AI or Slack. Those features are reserved for later slices.
+## Current state: Slice 2
+- Paste a transcript and validate input (50,000-character maximum).
+- Use a **configured OpenAI-compatible chat-completions API** to extract tasks, owners and explicit deadlines.
+- Display a read-only list of extracted action items or an empty-state message.
+- Editing and Slack posting are **not implemented yet**.
+
+## Configuration (GitHub Codespaces)
+Use **Codespace secrets** (or temporary environment variables), never commit actual keys. Configure:
+- `AI_API_KEY`: API key for your AI provider.
+- `AI_MODEL`: model identifier supported by your provider.
+- `AI_BASE_URL`: optional HTTPS API base URL, defaults to `https://api.openai.com/v1`. The provider must support `POST /chat/completions` with OpenAI-style response JSON.
+
+**Important:** A key beginning with `sk-` does not identify its provider. Do not assume your bootcamp's key works with OpenAI. Confirm the correct provider, model and endpoint before configuring.
 
 ## Run in GitHub Codespaces
+Pull the latest changes, then:
 
 ```bash
 python -m pip install -r requirements.txt
 python -m streamlit run app.py --server.address 0.0.0.0
 ```
 
-Open the forwarded Streamlit port (typically 8501) from the Codespaces **Ports** tab.
+Open the forwarded Streamlit port 8501. Restart Streamlit after changing environment variables.
 
 ## Test
-
 ```bash
 python -m unittest discover -s tests -v
+python -m py_compile app.py validation.py extraction.py
 ```
 
-## Project documents
-- [BRD.md](BRD.md): business objectives and workflow.
-- [PRD.md](PRD.md): product requirements and acceptance criteria.
-- [AGENTS.md](AGENTS.md): instructions for coding agents.
-- [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md): slice history, test results and known limitations.
+Unit tests use a mocked API; they require no paid credentials. For a live integration test, configure your provider and use a **fictional** transcript.
 
-Use only fictional transcripts for development. Never commit API keys or Slack webhooks.
+## Project documents
+- [BRD.md](BRD.md): business requirements and workflow.
+- [PRD.md](PRD.md): features and acceptance tests.
+- [AGENTS.md](AGENTS.md): coding guardrails.
+- [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md): progress and checkpoints.
+
+Do not share keys, real meeting transcripts or webhook URLs in screenshots or Git commits.
