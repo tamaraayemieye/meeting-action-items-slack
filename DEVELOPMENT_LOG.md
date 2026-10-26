@@ -52,3 +52,18 @@
 **Checkpoint:** Source and tests committed to `main` in successive commits; README update `945590deaddcd6c7c8d65241edfd07b7fd58cd52`; this log update is the final documentation checkpoint.
 **Out of scope:** Editing (Slice 3), Slack posting (Slice 4). No messages are sent to Slack.
 **Next:** Validate Slice 2 in Codespaces before starting Slice 3.
+
+## Slice 3 — Editable review (2026-10-26)
+**Goal:** Allow the user to correct AI-extracted action items before sending.
+**Implemented:** Editable Streamlit table with add/delete rows, task/owner/deadline fields, Slack recap preview.
+**Checkpoint:** `02fb9acfe7d520d30514ff969085b689431e65eb` (subsequently integrated with Slice 4).
+**Tests:** Deferred to final testing at user's explicit request; not claimed passed.
+
+## Slice 4 — Slack integration (2026-10-26)
+**Goal:** Post only explicitly approved, reviewed results to a Slack test channel.
+**Implemented:** Slack Incoming Webhook formatter and sender; HTTPS Slack webhook host check; approval checkbox and explicit submit in same form; delivery errors and confirmation; seven mocked Slack tests added.
+**Checkpoints:** `52b392b74e4aba48249ba8c95b6fd7b94648e790` (sender), `53871e0f423b5ccd6ac350a567f8c950133ec4d7` (approval workflow), `bae76b57b36c76a9ed0c8a27533e764c064aab4e` (tests).
+**Tests:** Deferred to final testing at user's explicit request. No live Slack post made.
+**Dependencies:** AI provider key, model, endpoint and a Slack Incoming Webhook secret for a test channel.
+**Known risk:** These slices have not been exercised in Codespaces. Confirm behavior before any real meeting transcript or production Slack channel is used.
+**Next:** Slice 5 — run automated and manual end-to-end tests, fix any failures, and prepare demonstration.
