@@ -36,3 +36,19 @@
 **Checkpoint:** Source and test files committed individually on `main`; latest source documentation commit `8daf724b275898cdc33de4ebe92ed00fc04ce19a`. This log update is the final Slice 1 checkpoint.
 
 **Next:** Await user approval for Slice 2. Do not implement Slice 2 yet.
+
+## Slice 1 — Browser launch verification (2026-10-26)
+**Evidence:** User provided a screenshot showing the Streamlit application loaded successfully in a Codespaces forwarded browser window, with transcript input and the Extract Action Items button visible.
+**Verified:** Browser launch and visible UI.
+**Not independently verified:** The success and empty-input error messages were not shown; these remain manual acceptance checks.
+
+## Slice 2 — AI extraction preview (2026-10-26)
+**Goal:** Extract structured tasks, owners and deadlines with a configurable AI endpoint; display results read-only.
+**Files changed:** `extraction.py`, `app.py`, `tests/test_extraction.py`, `validation.py`, `README.md`, `DEVELOPMENT_LOG.md`.
+**Implementation:** OpenAI-compatible chat-completions request using environment configuration; strict JSON response parsing; explicit missing-field defaults; read-only Streamlit results; empty state; user-friendly API/configuration errors.
+**Security:** No credentials committed. HTTPS required for configured API endpoint. AI credentials are provided through Codespaces secrets or environment variables.
+**Automated tests:** Nine extraction tests added, including mocked provider response and error paths. Existing six validation tests retained. Tests are **not yet executed in the user's Codespace**. Local execution attempt could not clone GitHub because the test container could not resolve github.com; no passing-test claim is made.
+**Manual tests pending:** Run unit tests in Codespaces; verify successful live extraction with a valid provider key/model/base URL; verify missing credentials and no-action-item state.
+**Checkpoint:** Source and tests committed to `main` in successive commits; README update `945590deaddcd6c7c8d65241edfd07b7fd58cd52`; this log update is the final documentation checkpoint.
+**Out of scope:** Editing (Slice 3), Slack posting (Slice 4). No messages are sent to Slack.
+**Next:** Validate Slice 2 in Codespaces before starting Slice 3.
