@@ -62,7 +62,6 @@ def extract_action_items(transcript: str) -> list[dict[str, str]]:
     url = base + "/chat/completions"
     payload = {
         "model": model,
-        "temperature": 0,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": transcript},
@@ -83,7 +82,11 @@ def extract_action_items(transcript: str) -> list[dict[str, str]]:
         if exc.code in (401, 403):
             raise ExtractionError("AI authentication failed. Check your provider and API key.") from exc
         if exc.code == 429:
-            raise ExtractionError("AI request limit reached. Please retry later.") from exc
+            raise ExtractionError("The AI provider returned a usage or rate limit (429). Check the bootcamp account limits.") from exc
+        if exc.code == 404:
+            raise ExtractionError("AI model or endpoint not found (404). Check AI_MODEL and AI_BASE_URL.") from exc
+        if exc.code == 400:
+            raise ExtractionError("The AI provider rejected the request (400). Check model compatibility.") from exc
         raise ExtractionError(f"AI request failed (HTTP {exc.code}).") from exc
     except (error.URLError, TimeoutError) as exc:
         raise ExtractionError("Could not reach the AI provider. Check the endpoint or try again.") from exc
